@@ -1,0 +1,28 @@
+# 知识库构建配置 - 使用本地文件测试
+
+# MCP Server
+servers:
+  corpus: servers/corpus
+
+# MCP Client Pipeline
+pipeline:
+- corpus.build_text_corpus
+- corpus.chunk_documents
+
+# Override parameters (覆盖 parameter.yaml 中的值)
+parameters:
+  parse_file_path: data/test_contract.docx
+  text_corpus_save_path: data/knowledge_base/corpus/test_corpus.jsonl
+  raw_chunk_path: data/knowledge_base/chunks/test_raw.jsonl
+  chunk_path: data/knowledge_base/chunks/test_final.jsonl
+  use_title: false
+  chunk_backend: sentence
+  chunk_size: 512
+  chunk_backend_configs:
+    sentence:
+      chunk_overlap: 50
+      min_sentences_per_chunk: 1
+      delim: "['.', '!', '?', '；', '。', '！', '？', '\\n']"
+
+# Server configurations
+server_configs: examples/server/kb_local_server.yaml

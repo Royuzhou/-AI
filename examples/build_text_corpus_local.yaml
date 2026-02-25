@@ -1,0 +1,17 @@
+# Text File(s) Parsing Demo - Modified for existing file
+
+# MCP Server
+servers:
+  corpus: servers/corpus
+
+# MCP Client Pipeline
+pipeline:
+- corpus.build_text_corpus
+
+# Override parameters for existing file
+parameters:
+  parse_file_path: data/knowledge_base/raw/upload_20260312_175643_2cb6ef17/中华人民共和国民法典_20200528.docx
+  text_corpus_save_path: data/knowledge_base/corpus/test_corpus.jsonl
+  image_corpus_save_path: data/knowledge_base/corpus/test_image.jsonl
+  raw_chunk_path: data/knowledge_base/chunks/test_chunks.jsonl
+  chunk_path: data/knowledge_base/chunks/test_final.jsonl

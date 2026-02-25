@@ -1,0 +1,16 @@
+# 知识库构建配置 - 简化版（仅文件解析）
+# 使用 corpus server 默认的 parameter.yaml
+
+# MCP Server
+servers:
+  corpus: servers/corpus
+
+# MCP Client Pipeline - 只执行文件解析
+pipeline:
+- corpus.build_text_corpus
+
+# Override parameters (覆盖 parameter.yaml 中的值)
+parameters:
+  parse_file_path: data/test_contract.docx
+  text_corpus_save_path: data/knowledge_base/corpus/test_corpus.jsonl
+  use_title: false

@@ -1,0 +1,23 @@
+# 本地文件解析测试 - 不需要向量数据库
+
+# MCP Server
+servers:
+  corpus: servers/corpus
+
+# MCP Client Pipeline
+pipeline:
+- corpus.build_text_corpus
+
+# Override parameters
+parameters:
+  # build_text_corpus parameters  
+  parse_file_path: data/test_contract.docx
+  text_corpus_save_path: data/knowledge_base/corpus/test_corpus.jsonl
+  image_corpus_save_path: data/knowledge_base/corpus/test_image.jsonl
+  
+  # chunking parameters
+  raw_chunk_path: data/knowledge_base/chunks/test_corpus.jsonl
+  chunk_path: data/knowledge_base/chunks/test_final.jsonl
+  use_title: false
+  chunk_backend: sentence
+  chunk_size: 512

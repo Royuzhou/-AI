@@ -1,0 +1,29 @@
+# servers/corpus/parameter.yaml - Modified for local file parsing without vector database
+parse_file_path: data/knowledge_base/raw/upload_20260312_175643_2cb6ef17/中华人民共和国民法典 _20200528.docx
+text_corpus_save_path: data/knowledge_base/corpus/test_corpus.jsonl
+image_corpus_save_path: data/knowledge_base/corpus/test_image.jsonl
+
+# mineru
+mineru_dir: data/knowledge_base/corpus/
+mineru_extra_params:
+  source: modelscope
+
+# chunking parameters
+raw_chunk_path: data/knowledge_base/chunks/test_corpus.jsonl
+chunk_path: data/knowledge_base/chunks/test_final.jsonl
+use_title: false
+chunk_backend: sentence # choices=["token", "sentence", "recursive"]
+tokenizer_or_token_counter: character
+chunk_size: 512
+chunk_backend_configs:
+  token:
+    chunk_overlap: 50
+  sentence:
+    chunk_overlap: 50
+    min_sentences_per_chunk: 1
+    delim: "['.', '!', '?', '；', '。', '！', '？', '\\n']"
+  recursive:
+    min_characters_per_chunk: 12
+
+# Disable vector database indexing (set to empty or comment out)
+# milvus_config_path: ""  # Leave empty to skip Milvus indexing
