@@ -1,0 +1,143 @@
+{
+  "results": [
+    {
+      "case_name": "Contract1",
+      "semantic_similarity": 0.9578947368421052,
+      "legal_completeness": 0.861111111111111,
+      "logical_consistency": 0.9578947368421054,
+      "language_normativity": 0.8833333333333333,
+      "revision_rationality": 0.7984795321637426,
+      "overall_score": 0.8906315789473683,
+      "details": {
+        "semantic_metrics": {
+          "similarity": 0.9578947368421052
+        },
+        "legal_metrics": {
+          "completeness": 0.861111111111111
+        },
+        "logic_metrics": {
+          "consistency": 0.9578947368421054
+        },
+        "language_metrics": {
+          "normativity": 0.8833333333333333
+        },
+        "revision_metrics": {
+          "rationality": 0.7984795321637426
+        }
+      }
+    },
+    {
+      "case_name": "Contract2",
+      "semantic_similarity": 1.0,
+      "legal_completeness": 0.6666666666666666,
+      "logical_consistency": 0.97,
+      "language_normativity": 0.8083333333333333,
+      "revision_rationality": 0.7888888888888888,
+      "overall_score": 0.8411944444444444,
+      "details": {
+        "semantic_metrics": {
+          "similarity": 1.0
+        },
+        "legal_metrics": {
+          "completeness": 0.6666666666666666
+        },
+        "logic_metrics": {
+          "consistency": 0.97
+        },
+        "language_metrics": {
+          "normativity": 0.8083333333333333
+        },
+        "revision_metrics": {
+          "rationality": 0.7888888888888888
+        }
+      }
+    },
+    {
+      "case_name": "Contract3",
+      "semantic_similarity": 0.9555555555555555,
+      "legal_completeness": 0.6666666666666666,
+      "logical_consistency": 0.9255555555555557,
+      "language_normativity": 0.8250000000000001,
+      "revision_rationality": 0.7088888888888889,
+      "overall_score": 0.8099166666666667,
+      "details": {
+        "semantic_metrics": {
+          "similarity": 0.9555555555555555
+        },
+        "legal_metrics": {
+          "completeness": 0.6666666666666666
+        },
+        "logic_metrics": {
+          "consistency": 0.9255555555555557
+        },
+        "language_metrics": {
+          "normativity": 0.8250000000000001
+        },
+        "revision_metrics": {
+          "rationality": 0.7088888888888889
+        }
+      }
+    },
+    {
+      "case_name": "Contract4",
+      "semantic_similarity": 1.0,
+      "legal_completeness": 0.7916666666666666,
+      "logical_consistency": 0.97,
+      "language_normativity": 0.8416666666666667,
+      "revision_rationality": 0.8222222222222222,
+      "overall_score": 0.8841111111111111,
+      "details": {
+        "semantic_metrics": {
+          "similarity": 1.0
+        },
+        "legal_metrics": {
+          "completeness": 0.7916666666666666
+        },
+        "logic_metrics": {
+          "consistency": 0.97
+        },
+        "language_metrics": {
+          "normativity": 0.8416666666666667
+        },
+        "revision_metrics": {
+          "rationality": 0.8222222222222222
+        }
+      }
+    },
+    {
+      "case_name": "Contract5",
+      "semantic_similarity": 1.0,
+      "legal_completeness": 0.6666666666666666,
+      "logical_consistency": 0.97,
+      "language_normativity": 0.8416666666666667,
+      "revision_rationality": 0.8333333333333333,
+      "overall_score": 0.8550833333333332,
+      "details": {
+        "semantic_metrics": {
+          "similarity": 1.0
+        },
+        "legal_metrics": {
+          "completeness": 0.6666666666666666
+        },
+        "logic_metrics": {
+          "consistency": 0.97
+        },
+        "language_metrics": {
+          "normativity": 0.8416666666666667
+        },
+        "revision_metrics": {
+          "rationality": 0.8333333333333333
+        }
+      }
+    }
+  ],
+  "average_scores": {
+    "semantic_similarity": 0.9826900584795322,
+    "legal_completeness": 0.7305555555555554,
+    "logical_consistency": 0.9586900584795321,
+    "language_normativity": 0.8400000000000001,
+    "revision_rationality": 0.790362573099415,
+    "overall": 0.8561874269005847
+  },
+  "total_cases": 5
+}

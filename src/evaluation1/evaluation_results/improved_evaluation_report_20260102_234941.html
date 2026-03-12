@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>合同修订评估报告（改进版）</title>
+    <style>
+        body { font-family: 'Microsoft YaHei', Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; border-bottom: 3px solid #4CAF50; padding-bottom: 10px; }
+        h2 { color: #555; margin-top: 30px; border-left: 4px solid #4CAF50; padding-left: 10px; }
+        .summary { background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .metric { display: inline-block; margin: 10px 20px; padding: 15px; background-color: #e8f5e9; border-radius: 5px; min-width: 150px; }
+        .metric-label { font-size: 14px; color: #666; }
+        .metric-value { font-size: 24px; font-weight: bold; color: #4CAF50; }
+        .metric-weight { font-size: 12px; color: #999; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #4CAF50; color: white; }
+        tr:hover { background-color: #f5f5f5; }
+        .score-good { color: #4CAF50; font-weight: bold; }
+        .score-medium { color: #FF9800; font-weight: bold; }
+        .score-poor { color: #f44336; font-weight: bold; }
+        .timestamp { text-align: right; color: #999; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <h1>合同修订评估报告（改进版）</h1>
+        <div class='timestamp'>生成时间: 2026-01-02 23:49:41</div>
+        <h2>总体统计</h2>
+        <div class='summary'>
+            <p><strong>评估用例总数:</strong> 5</p>
+        </div>
+        <h2>平均分数</h2>
+        <div class='summary'>
+            <div class='metric'>
+                <div class='metric-label'>语义相似度</div>
+                <div class='metric-value'>0.9827</div>
+                <div class='metric-weight'>权重: 25%</div>
+            </div>
+            <div class='metric'>
+                <div class='metric-label'>法律条款完整性</div>
+                <div class='metric-value'>0.7306</div>
+                <div class='metric-weight'>权重: 25%</div>
+            </div>
+            <div class='metric'>
+                <div class='metric-label'>逻辑一致性</div>
+                <div class='metric-value'>0.9587</div>
+                <div class='metric-weight'>权重: 15%</div>
+            </div>
+            <div class='metric'>
+                <div class='metric-label'>语言规范性</div>
+                <div class='metric-value'>0.8400</div>
+                <div class='metric-weight'>权重: 15%</div>
+            </div>
+            <div class='metric'>
+                <div class='metric-label'>修订合理性</div>
+                <div class='metric-value'>0.7904</div>
+                <div class='metric-weight'>权重: 20%</div>
+            </div>
+            <div class='metric'>
+                <div class='metric-label'>综合分数</div>
+                <div class='metric-value'>0.8562</div>
+            </div>
+        </div>
+        <h2>详细评估结果</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>用例名称</th>
+                    <th>语义相似度</th>
+                    <th>法律完整性</th>
+                    <th>逻辑一致性</th>
+                    <th>语言规范性</th>
+                    <th>修订合理性</th>
+                    <th>综合分数</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Contract1</td>
+                    <td>0.9579</td>
+                    <td>0.8611</td>
+                    <td>0.9579</td>
+                    <td>0.8833</td>
+                    <td>0.7985</td>
+                    <td class='score-good'>0.8906</td>
+                </tr>
+                <tr>
+                    <td>Contract2</td>
+                    <td>1.0000</td>
+                    <td>0.6667</td>
+                    <td>0.9700</td>
+                    <td>0.8083</td>
+                    <td>0.7889</td>
+                    <td class='score-good'>0.8412</td>
+                </tr>
+                <tr>
+                    <td>Contract3</td>
+                    <td>0.9556</td>
+                    <td>0.6667</td>
+                    <td>0.9256</td>
+                    <td>0.8250</td>
+                    <td>0.7089</td>
+                    <td class='score-good'>0.8099</td>
+                </tr>
+                <tr>
+                    <td>Contract4</td>
+                    <td>1.0000</td>
+                    <td>0.7917</td>
+                    <td>0.9700</td>
+                    <td>0.8417</td>
+                    <td>0.8222</td>
+                    <td class='score-good'>0.8841</td>
+                </tr>
+                <tr>
+                    <td>Contract5</td>
+                    <td>1.0000</td>
+                    <td>0.6667</td>
+                    <td>0.9700</td>
+                    <td>0.8417</td>
+                    <td>0.8333</td>
+                    <td class='score-good'>0.8551</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
