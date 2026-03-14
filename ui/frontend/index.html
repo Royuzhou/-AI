@@ -670,6 +670,16 @@
               Configure DB
             </button>
 
+            <button class="btn btn-outline-primary btn-sm px-3 d-flex align-items-center gap-2" onclick="openPineconeIndexManager()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+              </svg>
+              <span>Pinecone Indexes</span>
+            </button>
+
             <button class="btn btn-dark btn-sm px-3 d-flex align-items-center gap-2" onclick="openImportModal()">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -881,15 +891,56 @@
   <dialog id="db-config-modal" class="apple-modal">
     <h5 class="mb-3 fw-bold" data-i18n="kb_database_settings">Database Settings</h5>
 
+    <!-- Database Type Selection -->
     <div class="mb-3">
-      <label class="form-label small text-muted text-uppercase fw-bold" data-i18n="kb_milvus_uri">Milvus URI</label>
-      <input type="text" id="cfg-uri" class="form-control" placeholder="path/to/local.db OR http://localhost:19530">
-      <div class="form-text" data-i18n="kb_milvus_uri_help">Supports local file paths or remote HTTP/TCP connections.</div>
+      <label class="form-label small text-muted text-uppercase fw-bold">Database Type</label>
+      <select id="cfg-db-type" class="form-select">
+        <option value="pinecone">Pinecone (Cloud)</option>
+        <option value="milvus">Milvus (Local/Remote)</option>
+      </select>
     </div>
 
-    <div class="mb-4">
-      <label class="form-label small text-muted text-uppercase fw-bold" data-i18n="kb_token_optional">Token (Optional)</label>
-      <input type="password" id="cfg-token" class="form-control" placeholder="API Key or user:password">
+    <!-- Pinecone Configuration Section -->
+    <div id="pinecone-config-section">
+      <div class="mb-3">
+        <label class="form-label small text-muted text-uppercase fw-bold">Pinecone API Key</label>
+        <input type="password" id="cfg-pinecone-api-key" class="form-control" placeholder="pcsk_xxx...">
+        <div class="form-text">Get your API key from <a href="https://app.pinecone.io" target="_blank">Pinecone Console</a></div>
+      </div>
+      
+      <div class="mb-3">
+        <label class="form-label small text-muted text-uppercase fw-bold">Index Name</label>
+        <input type="text" id="cfg-pinecone-index" class="form-control" placeholder="legal-knowledge-base">
+      </div>
+      
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label small text-muted text-uppercase fw-bold">Dimension</label>
+          <input type="number" id="cfg-pinecone-dimension" class="form-control" value="384">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label small text-muted text-uppercase fw-bold">Metric</label>
+          <select id="cfg-pinecone-metric" class="form-select">
+            <option value="cosine">cosine</option>
+            <option value="dotproduct">dotproduct</option>
+            <option value="euclidean">euclidean</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Milvus Configuration Section (Original) -->
+    <div id="milvus-config-section" style="display: none;">
+      <div class="mb-3">
+        <label class="form-label small text-muted text-uppercase fw-bold" data-i18n="kb_milvus_uri">Milvus URI</label>
+        <input type="text" id="cfg-uri" class="form-control" placeholder="path/to/local.db OR http://localhost:19530">
+        <div class="form-text" data-i18n="kb_milvus_uri_help">Supports local file paths or remote HTTP/TCP connections.</div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label small text-muted text-uppercase fw-bold" data-i18n="kb_token_optional">Token (Optional)</label>
+        <input type="password" id="cfg-token" class="form-control" placeholder="API Key or user:password">
+      </div>
     </div>
 
     <div class="modal-actions d-flex justify-content-end gap-2">

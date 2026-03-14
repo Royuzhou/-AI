@@ -1,0 +1,57 @@
+# UltraRAG 简化版 RAG 迭代配置
+# 移除了复杂的评估和重排序，保留核心迭代检索功能
+
+servers:
+  corpus: servers/corpus
+  retriever: servers/retriever
+  generation: servers/generation
+
+pipeline:
+  # Phase 1: 构建知识库
+  - corpus.build_text_corpus
+  - corpus.chunk_documents
+  - retriever.retriever_init
+  - retriever.retriever_index
+  
+  # Phase 2: 迭代检索（2 轮）
+  - name: "iterative_search"
+    iterations: 2
+    steps:
+      - retriever.retriever_search
+      - generation.generate_query_rewrite
+  
+  # Phase 3: 生成答案
+  - generation.generate_response
+
+parameters:
+  # 基础参数
+  parse_file_path: data/knowledge_base/raw/upload_20260312_175643_2cb6ef17/中华人民共和国民法典_20200528.docx
+  text_corpus_save_path: data/knowledge_base/corpus/simple_corpus.jsonl
+  chunk_path: data/knowledge_base/chunks/simple_chunks.jsonl
+  
+  # 分块配置
+  use_title: false
+  chunk_backend: sentence
+  chunk_size: 512
+  chunk_overlap: 50
+  
+  # 检索配置
+  collection_name: simple_legal_db
+  search_top_k: 5
+  search_score_threshold: 0.6
+  
+  # 迭代配置
+  max_iterations: 2
+  query_rewrite_strategy: "simplification"
+  
+  # 生成配置
+  generator_model: "Qwen/Qwen2.5-7B-Instruct"
+  max_tokens: 1024
+  temperature: 0.5
+
+# ==================== 服务器配置映射 ====================
+server_configs: examples/server/simple_rag_server.yaml
+
+logging:
+  level: INFO
+  save_dir: output/simple_rag

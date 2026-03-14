@@ -26,6 +26,20 @@ try:
 except ImportError:
     MilvusClient = None
 
+# Pinecone 支持 - 使用绝对导入
+try:
+    import sys
+    from pathlib import Path
+    backend_dir = Path(__file__).parent
+    if str(backend_dir) not in sys.path:
+        sys.path.insert(0, str(backend_dir))
+    
+    from pinecone_manager import PineconeManager, load_pinecone_config, get_pinecone_client
+    PINECONE_AVAILABLE = True
+except ImportError as e:
+    PINECONE_AVAILABLE = False
+    LOGGER.warning(f"Pinecone manager not available: {e}")
+
 LOGGER = logging.getLogger(__name__)
 
 # Suppress noisy "Event loop is closed" errors triggered by fastmcp transport
@@ -2026,6 +2040,14 @@ def load_kb_config() -> Dict[str, Any]:
             "index_params": {"index_type": "AUTOINDEX", "metric_type": "IP"},
             "search_params": {"metric_type": "IP", "params": {}},
             "index_chunk_size": 1000,
+        },
+        "pinecone": {
+            "api_key": "",
+            "index_name": "default",
+            "dimension": 384,
+            "metric": "cosine",
+            "cloud": "aws",
+            "region": "us-east-1"
         }
     }
 
@@ -2034,12 +2056,20 @@ def load_kb_config() -> Dict[str, Any]:
 
     try:
         saved = json.loads(KB_CONFIG_PATH.read_text(encoding="utf-8"))
-        if "milvus" not in saved:
-            return default_config
-
-        full_cfg = default_config["milvus"].copy()
-        full_cfg.update(saved["milvus"])
-        return {"milvus": full_cfg}
+        
+        # Merge with defaults
+        full_cfg = default_config.copy()
+        if "milvus" in saved:
+            milvus_default = default_config["milvus"].copy()
+            milvus_default.update(saved["milvus"])
+            full_cfg["milvus"] = milvus_default
+        
+        if "pinecone" in saved:
+            pinecone_default = default_config["pinecone"].copy()
+            pinecone_default.update(saved["pinecone"])
+            full_cfg["pinecone"] = pinecone_default
+            
+        return full_cfg
 
     except Exception:
         return default_config
@@ -2074,6 +2104,69 @@ def _get_milvus_client() -> Any:
     except Exception as e:
         LOGGER.error(f"Failed to connect to Milvus: {e}")
         raise e
+
+
+def _get_pinecone_client() -> Optional[Any]:
+    """Get Pinecone client instance.
+
+    Returns:
+        Pinecone client instance or None if not configured/available
+
+    Raises:
+        ImportError: If pinecone-client is not installed
+    """
+    try:
+        from pinecone import Pinecone
+    except ImportError:
+        LOGGER.warning("pinecone-client not installed")
+        return None
+    
+    cfg = load_kb_config()
+    pinecone_cfg = cfg.get("pinecone", {})
+    api_key = pinecone_cfg.get("api_key", "")
+    
+    if not api_key:
+        return None
+    
+    try:
+        pc = Pinecone(api_key=api_key)
+        LOGGER.info("Pinecone client initialized successfully")
+        return pc
+    except Exception as e:
+        LOGGER.error(f"Failed to initialize Pinecone: {e}")
+        return None
+
+
+def get_vector_store():
+    """Get vector store client (Milvus or Pinecone).
+    
+    Priority: Pinecone > Milvus > None
+    
+    Returns:
+        Vector store client instance or None
+    """
+    cfg = load_kb_config()
+    
+    # Try Pinecone first
+    pinecone_cfg = cfg.get("pinecone", {})
+    if pinecone_cfg.get("api_key"):
+        pc = _get_pinecone_client()
+        if pc:
+            LOGGER.info("Using Pinecone as vector store")
+            return pc
+    
+    # Fallback to Milvus
+    milvus_cfg = cfg.get("milvus", {})
+    if milvus_cfg.get("uri"):
+        try:
+            client = _get_milvus_client()
+            LOGGER.info("Using Milvus as vector store")
+            return client
+        except Exception:
+            pass
+    
+    LOGGER.warning("No vector store configured")
+    return None
 
 
 def list_kb_files() -> Dict[str, List[Dict[str, Any]]]:
@@ -2150,31 +2243,69 @@ def list_kb_files() -> Dict[str, List[Dict[str, Any]]]:
             items.append(item)
         return items
 
+    # 尝试连接 Pinecone
     collections = []
-    db_status = "unknown"
-    try:
-        client = _get_milvus_client()
-        names = client.list_collections()
-        for name in names:
-            res = client.get_collection_stats(name)
-            count = res.get("row_count", 0)
-            try:
-                desc = client.describe_collection(name).get("description", "")
-            except Exception:
-                desc = ""
-            collections.append(
-                {
-                    "name": name,
-                    "display_name": _extract_display_name_from_desc(desc, name),
-                    "count": count,
-                    "category": "collection",
-                }
-            )
-        client.close()
-        db_status = "connected"
-    except Exception as e:
-        LOGGER.warning(f"Milvus connection failed: {e}")
-        db_status = "error"
+    db_status = "disconnected"
+    db_type = "none"
+    
+    config = load_kb_config()
+    
+    # 检查是否配置了 Pinecone
+    pinecone_cfg = config.get("pinecone", {})
+    milvus_cfg = config.get("milvus", {})
+    
+    # 优先使用 Pinecone
+    if pinecone_cfg and pinecone_cfg.get("api_key"):
+        # 使用 Pinecone 连接
+        try:
+            pc_client = get_pinecone_client()
+            if pc_client:
+                indexes = pc_client.list_indexes()
+                for idx_name in indexes:
+                    stats = pc_client.get_index_stats(idx_name)
+                    collections.append({
+                        "name": idx_name,
+                        "display_name": idx_name.replace("-", " ").title(),
+                        "count": stats.get("total_vector_count", 0),
+                        "category": "collection",
+                        "type": "pinecone"
+                    })
+                db_status = "connected"
+                db_type = "pinecone"
+                LOGGER.info(f"Pinecone connected, found {len(indexes)} indexes")
+        except Exception as e:
+            LOGGER.warning(f"Pinecone connection failed: {e}")
+            db_status = "disconnected"
+            collections = []
+    
+    # 如果 Pinecone 未配置，尝试 Milvus
+    elif milvus_cfg and milvus_cfg.get("uri"):
+        try:
+            client = _get_milvus_client()
+            names = client.list_collections()
+            for name in names:
+                res = client.get_collection_stats(name)
+                count = res.get("row_count", 0)
+                try:
+                    desc = client.describe_collection(name).get("description", "")
+                except Exception:
+                    desc = ""
+                collections.append(
+                    {
+                        "name": name,
+                        "display_name": _extract_display_name_from_desc(desc, name),
+                        "count": count,
+                        "category": "collection",
+                        "type": "milvus"
+                    }
+                )
+            client.close()
+            db_status = "connected"
+            db_type = "milvus"
+        except Exception as e:
+            LOGGER.warning(f"Milvus connection failed: {e}")
+            db_status = "disconnected"
+            collections = []
 
     return {
         "raw": _scan_files(KB_RAW_DIR, "raw"),
@@ -2182,7 +2313,8 @@ def list_kb_files() -> Dict[str, List[Dict[str, Any]]]:
         "chunks": _scan_files(KB_CHUNKS_DIR, "chunks"),
         "index": collections,
         "db_status": db_status,
-        "db_config": load_kb_config(),
+        "db_type": db_type,
+        "db_config": config,
     }
 
 

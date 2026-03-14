@@ -935,6 +935,118 @@ def create_app(admin_mode: bool = False) -> Flask:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+    @app.route("/api/kb/pinecone/indexes", methods=["GET"])
+    def list_pinecone_indexes() -> Response:
+        """List Pinecone indexes.
+
+        Returns:
+            JSON response with list of Pinecone indexes
+        """
+        try:
+            pc = pm._get_pinecone_client()
+            if not pc:
+                return jsonify({"error": "Pinecone not configured or client not installed"}), 400
+            
+            indexes = pc.list_indexes()
+            index_list = []
+            for idx in indexes:
+                try:
+                    index = pc.Index(idx.name)
+                    stats = index.describe_index_stats()
+                    index_list.append({
+                        "name": idx.name,
+                        "dimension": stats.get("dimension", 0),
+                        "metric": stats.get("metric", "cosine"),
+                        "total_vector_count": stats.get("total_vector_count", 0),
+                        "status": "ready"
+                    })
+                except Exception as e:
+                    LOGGER.warning(f"Failed to get stats for index {idx.name}: {e}")
+                    index_list.append({
+                        "name": idx.name,
+                        "dimension": 0,
+                        "metric": "unknown",
+                        "total_vector_count": 0,
+                        "status": "error"
+                    })
+            
+            return jsonify({"indexes": index_list})
+        except Exception as e:
+            LOGGER.error(f"Failed to list Pinecone indexes: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/kb/pinecone/index", methods=["POST"])
+    def create_pinecone_index() -> Response:
+        """Create a new Pinecone index.
+
+        Returns:
+            JSON response with creation result
+        """
+        try:
+            pc = pm._get_pinecone_client()
+            if not pc:
+                return jsonify({"error": "Pinecone not configured or client not installed"}), 400
+            
+            payload = request.get_json(force=True)
+            index_name = payload.get("index_name", "default")
+            dimension = payload.get("dimension", 384)
+            metric = payload.get("metric", "cosine")
+            cloud = payload.get("cloud", "aws")
+            region = payload.get("region", "us-east-1")
+            
+            # Check if index already exists
+            existing_indexes = [idx.name for idx in pc.list_indexes()]
+            if index_name in existing_indexes:
+                return jsonify({"error": f"Index '{index_name}' already exists"}), 400
+            
+            # Create index using ServerlessSpec
+            from pinecone import ServerlessSpec
+            pc.create_index(
+                name=index_name,
+                dimension=dimension,
+                metric=metric,
+                spec=ServerlessSpec(
+                    cloud=cloud,
+                    region=region
+                )
+            )
+            
+            LOGGER.info(f"Created Pinecone index: {index_name}")
+            return jsonify({
+                "status": "created",
+                "index_name": index_name,
+                "dimension": dimension,
+                "metric": metric
+            })
+        except Exception as e:
+            LOGGER.error(f"Failed to create Pinecone index: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/kb/pinecone/index", methods=["DELETE"])
+    def delete_pinecone_index() -> Response:
+        """Delete a Pinecone index.
+
+        Returns:
+            JSON response with deletion result
+        """
+        try:
+            pc = pm._get_pinecone_client()
+            if not pc:
+                return jsonify({"error": "Pinecone not configured or client not installed"}), 400
+            
+            payload = request.get_json(force=True)
+            index_name = payload.get("index_name")
+            
+            if not index_name:
+                return jsonify({"error": "index_name required"}), 400
+            
+            pc.delete_index(index_name)
+            LOGGER.info(f"Deleted Pinecone index: {index_name}")
+            return jsonify({"status": "deleted", "index_name": index_name})
+        except Exception as e:
+            LOGGER.error(f"Failed to delete Pinecone index: {e}")
+            return jsonify({"error": str(e)}), 500
+
     @app.route("/api/kb/files", methods=["GET"])
     def list_kb_files() -> Response:
         """List knowledge base files.
@@ -1597,12 +1709,12 @@ You help users:
 When suggesting modifications, use the following format to indicate actionable changes:
 
 For Pipeline modifications:
-```yaml:pipeline
+``yaml:pipeline
 <your yaml content here>
 ```
 
 For Prompt modifications:
-```jinja:prompt:<filename>
+``jinja:prompt:<filename>
 <your jinja content here>
 ```
 
@@ -1637,7 +1749,7 @@ Be concise and helpful. Provide complete code when suggesting changes.
         import json
 
         params_str = json.dumps(context["parameters"], indent=2, ensure_ascii=False)
-        context_info.append(f"Current parameters:\n```json\n{params_str}\n```")
+        context_info.append(f"Current parameters:\n``json\n{params_str}\n```")
 
     if context_info:
         base_prompt += "\n\n## Current Context\n" + "\n".join(context_info)

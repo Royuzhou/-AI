@@ -3995,6 +3995,35 @@ textarea.parameter-input {
   /* Slightly smaller icon for refinement */
 }
 
+/* Database type badge */
+.db-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 6px;
+  white-space: nowrap;
+}
+
+.db-type-badge.pinecone {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.db-type-badge.milvus {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.db-type-badge .db-icon {
+  font-size: 0.8rem;
+}
+
 /* 2. Elegant delete button */
 .btn-delete-collection {
   width: 32px;

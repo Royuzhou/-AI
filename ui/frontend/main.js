@@ -860,7 +860,7 @@ function renderKBList(container, files, nextPipeline, actionLabel) {
         const sizeStr = (f.size / 1024).toFixed(1) + " KB";
 
         // 2. Icon (SVG)
-        const svgFolder = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+        const svgFolder = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 0 2 2z"></path></svg>`;
         const svgFile = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
         const iconSvg = isFolder ? svgFolder : svgFile;
 
@@ -1020,6 +1020,14 @@ function renderCollectionList(container, collections) {
     const getLabel = c => (c.display_name || c.name || "").toLowerCase();
     collections = collections.slice().sort((a, b) => getLabel(a).localeCompare(getLabel(b)));
 
+    // Determine database type from current config
+    let dbType = 'milvus'; // Default to milvus
+    if (currentDbConfig && currentDbConfig.pinecone && currentDbConfig.pinecone.api_key) {
+        dbType = 'pinecone';
+    } else if (currentDbConfig && currentDbConfig.milvus) {
+        dbType = 'milvus';
+    }
+
     collections.forEach(c => {
         const displayName = c.display_name || c.name || "Untitled";
         const card = document.createElement('div');
@@ -1029,6 +1037,10 @@ function renderCollectionList(container, collections) {
         const colors = pickKbColors(displayName || c.name || "collection");
         const coverInitial = getKbInitial(displayName || c.name || "C");
 
+        // Database type badge
+        const dbIcon = dbType === 'pinecone' ? '🌲' : '💾';
+        const dbLabel = dbType === 'pinecone' ? 'Pinecone' : 'Milvus';
+        
         // Render card
         card.innerHTML = `
             <div class="kb-card-main">
@@ -1038,6 +1050,10 @@ function renderCollectionList(container, collections) {
                 <div class="kb-info-box">
                      <div class="kb-card-title" title="${displayName}">${displayName}</div>
                      <div class="kb-meta-count">${countStr}</div>
+                     <div class="db-type-badge ${dbType}">
+                        <span class="db-icon">${dbIcon}</span>
+                        <span>${dbLabel}</span>
+                     </div>
                 </div>
                 
                 <button class="btn-delete-book" onclick="event.stopPropagation(); deleteKBFile('collection', '${c.name}', '${displayName.replace(/'/g, "\\'")}')" title="${t("kb_delete_collection")}">
@@ -1068,8 +1084,20 @@ function updateDbStatusUI(status, config) {
         : (status === 'connecting' ? t('kb_connecting') : t('kb_disconnected'));
     chip.setAttribute('data-status', statusClass);
 
-    // URI display: use shortened version in main text, full address in tooltip
-    const fullUri = (config && config.milvus && config.milvus.uri) ? config.milvus.uri : t("kb_not_configured");
+    // URI display: Support both Milvus and Pinecone configurations
+    let fullUri = t("kb_not_configured");
+    
+    // Check Pinecone configuration first
+    if (config && config.pinecone && config.pinecone.api_key) {
+        const apiKey = config.pinecone.api_key;
+        const indexName = config.pinecone.index_name || 'default';
+        fullUri = `Pinecone (${indexName})`;
+    } 
+    // Fallback to Milvus configuration
+    else if (config && config.milvus && config.milvus.uri) {
+        fullUri = config.milvus.uri;
+    }
+    
     const shortUri = fullUri.length > 38 ? `${fullUri.slice(0, 16)}…${fullUri.slice(-12)}` : fullUri;
     els.dbUriDisplay.textContent = shortUri;
     chip.title = `${t("kb_endpoint")}: ${fullUri}`;
@@ -1080,31 +1108,382 @@ window.openDbConfigModal = async function () {
     const res = await fetchJSON('/api/kb/config');
     const cfg = res;
 
-    // Read from milvus field
-    const milvus = cfg.milvus || {};
-
-    if (els.cfgUri) els.cfgUri.value = milvus.uri || '';
-    if (els.cfgToken) els.cfgToken.value = milvus.token || '';
-
     // Store full config structure for merging on save
     window._currentFullKbConfig = cfg;
 
-    if (els.dbConfigModal) els.dbConfigModal.showModal();
+    // Determine current database type from config
+    const isPinecone = cfg.pinecone && cfg.pinecone.api_key;
+    const dbType = isPinecone ? 'pinecone' : 'milvus';
+    
+    // Set database type selector if exists
+    const dbTypeSelect = document.getElementById('cfg-db-type');
+    if (dbTypeSelect) {
+        dbTypeSelect.value = dbType;
+    }
+    
+    // Set Milvus fields if Milvus is selected
+    const milvusUriInput = document.getElementById('cfg-milvus-uri');
+    const milvusUserInput = document.getElementById('cfg-milvus-user');
+    const milvusPassInput = document.getElementById('cfg-milvus-pass');
+    if (dbType === 'milvus') {
+        milvusUriInput.value = cfg.milvus ? cfg.milvus.uri : '';
+        milvusUserInput.value = cfg.milvus ? cfg.milvus.user : '';
+        milvusPassInput.value = cfg.milvus ? cfg.milvus.password : '';
+    }
+    
+    // Set Pinecone fields if Pinecone is selected
+    const pineconeApiKeyInput = document.getElementById('cfg-pinecone-api-key');
+    const pineconeIndexInput = document.getElementById('cfg-pinecone-index-name');
+    if (dbType === 'pinecone') {
+        pineconeApiKeyInput.value = cfg.pinecone ? cfg.pinecone.api_key : '';
+        pineconeIndexInput.value = cfg.pinecone ? cfg.pinecone.index_name : '';
+    }
+    
+    // Show modal
+    const modal = document.getElementById('db-config-modal');
+    if (modal) modal.showModal();
+    
+    // Refresh KB files to show updated status
+    refreshKBFiles(); // Refresh immediately to test connection status
 };
 
+// =========================================
+// Pinecone Index Management
+// =========================================
+
+window.openPineconeIndexManager = async function() {
+    try {
+        // Fetch Pinecone indexes
+        const res = await fetch('/api/kb/pinecone/indexes');
+        const data = await res.json();
+        
+        if (!res.ok) {
+            throw new Error(data.error || 'Failed to fetch indexes');
+        }
+        
+        // Build index list HTML
+        const indexes = data.indexes || [];
+        let indexListHtml = '';
+        
+        if (indexes.length === 0) {
+            indexListHtml = `
+                <div class="text-center py-4 text-muted">
+                    <div style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.3;">🌲</div>
+                    <p>No Pinecone indexes found.</p>
+                    <p class="small">Click "Create Index" to create a new index.</p>
+                </div>
+            `;
+        } else {
+            indexListHtml = `
+                <div class="list-group">
+                    ${indexes.map(idx => `
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <div class="fw-bold">${idx.name}</div>
+                                <div class="small text-muted">
+                                    ${idx.dimension}d • ${idx.metric} • ${idx.total_vector_count.toLocaleString()} vectors
+                                </div>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" onclick="usePineconeIndex('${idx.name}')" title="Use this index">
+                                    Use
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deletePineconeIndex('${idx.name}')" title="Delete index">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        // Show modal
+        const modalHtml = `
+            <dialog id="pinecone-index-modal" class="apple-modal" style="display: block;">
+                <h5 class="mb-3 fw-bold">🌲 Pinecone Index Manager</h5>
+                
+                <div class="alert alert-light border mb-3 p-2 small">
+                    <strong>Current Index:</strong> ${window._currentPineconeIndex || 'Not set'}
+                </div>
+                
+                ${indexListHtml}
+                
+                <div class="modal-actions d-flex justify-content-end gap-2 mt-3">
+                    <button class="btn btn-light border btn-sm" onclick="closePineconeIndexManager()">
+                        Close
+                    </button>
+                    <button class="btn btn-dark btn-sm" onclick="showCreatePineconeIndexForm()">
+                        Create Index
+                    </button>
+                </div>
+            </dialog>
+        `;
+        
+        // Remove existing modal if any
+        const existingModal = document.getElementById('pinecone-index-modal');
+        if (existingModal) existingModal.remove();
+        
+        // Append modal to body
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHtml;
+        document.body.appendChild(modalContainer);
+        
+    } catch (e) {
+        showModal(`Failed to load Pinecone indexes: ${e.message}`, { 
+            title: 'Error', 
+            type: 'error' 
+        });
+    }
+};
+
+window.closePineconeIndexManager = function() {
+    const modal = document.getElementById('pinecone-index-modal');
+    if (modal) {
+        modal.remove();
+    }
+};
+
+window.showCreatePineconeIndexForm = function() {
+    const modalHtml = `
+        <dialog id="pinecone-create-modal" class="apple-modal" style="display: block;">
+            <h5 class="mb-3 fw-bold">Create New Pinecone Index</h5>
+            
+            <div class="mb-3">
+                <label class="form-label small text-muted text-uppercase fw-bold">Index Name</label>
+                <input type="text" id="new-index-name" class="form-control" placeholder="legal-knowledge-base">
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label small text-muted text-uppercase fw-bold">Dimension</label>
+                    <input type="number" id="new-index-dimension" class="form-control" value="384">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label small text-muted text-uppercase fw-bold">Metric</label>
+                    <select id="new-index-metric" class="form-select">
+                        <option value="cosine">cosine</option>
+                        <option value="dotproduct">dotproduct</option>
+                        <option value="euclidean">euclidean</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label small text-muted text-uppercase fw-bold">Cloud</label>
+                    <select id="new-index-cloud" class="form-select">
+                        <option value="aws">AWS</option>
+                        <option value="gcp">GCP</option>
+                        <option value="azure">Azure</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label small text-muted text-uppercase fw-bold">Region</label>
+                    <input type="text" id="new-index-region" class="form-control" value="us-east-1" placeholder="us-east-1">
+                </div>
+            </div>
+            
+            <div class="modal-actions d-flex justify-content-end gap-2 mt-3">
+                <button class="btn btn-light border btn-sm" onclick="closeCreatePineconeIndexForm()">
+                    Cancel
+                </button>
+                <button class="btn btn-dark btn-sm" onclick="createPineconeIndex()">
+                    Create
+                </button>
+            </div>
+        </dialog>
+    `;
+    
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHtml;
+    document.body.appendChild(modalContainer);
+};
+
+window.closeCreatePineconeIndexForm = function() {
+    const modal = document.getElementById('pinecone-create-modal');
+    if (modal) {
+        modal.remove();
+    }
+};
+
+window.createPineconeIndex = async function() {
+    try {
+        const indexName = document.getElementById('new-index-name').value.trim();
+        const dimension = parseInt(document.getElementById('new-index-dimension').value);
+        const metric = document.getElementById('new-index-metric').value;
+        const cloud = document.getElementById('new-index-cloud').value;
+        const region = document.getElementById('new-index-region').value.trim();
+        
+        if (!indexName) {
+            showModal('Index name is required', { title: 'Validation Error', type: 'warning' });
+            return;
+        }
+        
+        const res = await fetch('/api/kb/pinecone/index', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                index_name: indexName,
+                dimension: dimension,
+                metric: metric,
+                cloud: cloud,
+                region: region
+            })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+            throw new Error(data.error || 'Failed to create index');
+        }
+        
+        closeCreatePineconeIndexForm();
+        showModal(`Index "${indexName}" created successfully!`, { 
+            title: 'Success', 
+            type: 'success' 
+        });
+        
+        // Refresh index list
+        openPineconeIndexManager();
+        
+    } catch (e) {
+        showModal(`Failed to create index: ${e.message}`, { 
+            title: 'Error', 
+            type: 'error' 
+        });
+    }
+};
+
+window.deletePineconeIndex = async function(indexName) {
+    const confirmed = await showConfirm(`Are you sure you want to delete index "${indexName}"? This action cannot be undone.`, {
+        title: 'Delete Index',
+        type: 'warning',
+        confirmText: 'Delete',
+        danger: true
+    });
+    
+    if (!confirmed) return;
+    
+    try {
+        const res = await fetch('/api/kb/pinecone/index', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ index_name: indexName })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+            throw new Error(data.error || 'Failed to delete index');
+        }
+        
+        closePineconeIndexManager();
+        showModal(`Index "${indexName}" deleted successfully!`, { 
+            title: 'Success', 
+            type: 'success' 
+        });
+        
+    } catch (e) {
+        showModal(`Failed to delete index: ${e.message}`, { 
+            title: 'Error', 
+            type: 'error' 
+        });
+    }
+};
+
+window.usePineconeIndex = async function(indexName) {
+    try {
+        // Update current index in config
+        window._currentPineconeIndex = indexName;
+        
+        // Save to backend config
+        const config = await fetchJSON('/api/kb/config');
+        if (!config.pinecone) config.pinecone = {};
+        config.pinecone.index_name = indexName;
+        
+        await fetch('/api/kb/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(config)
+        });
+        
+        closePineconeIndexManager();
+        showModal(`Now using index "${indexName}"`, { 
+            title: 'Success', 
+            type: 'success' 
+        });
+        
+        // Refresh KB files to show updated status
+        refreshKBFiles();
+        
+    } catch (e) {
+        showModal(`Failed to use index: ${e.message}`, { 
+            title: 'Error', 
+            type: 'error' 
+        });
+    }
+};
+
+// =========================================
+// Save Database Configuration
+// =========================================
+
 window.saveDbConfig = async function () {
-    if (!els.cfgUri) return;
-    const uri = els.cfgUri.value.trim();
-    const token = els.cfgToken.value.trim();
-
-    if (!uri) { showModal(t("kb_uri_required"), { title: t("kb_validation_error"), type: "warning" }); return; }
-
+    const dbTypeSelect = document.getElementById('cfg-db-type');
+    const dbType = dbTypeSelect ? dbTypeSelect.value : 'milvus';
+    
     const fullConfig = window._currentFullKbConfig || {};
-    if (!fullConfig.milvus) fullConfig.milvus = {};
 
-    // Only update URI and Token, preserve other advanced fields
-    fullConfig.milvus.uri = uri;
-    fullConfig.milvus.token = token;
+    // Save based on database type
+    if (dbType === 'pinecone') {
+        // Pinecone mode - collect all Pinecone configuration
+        const apiKeyInput = document.getElementById('cfg-pinecone-api-key');
+        const indexNameInput = document.getElementById('cfg-pinecone-index');
+        const dimensionInput = document.getElementById('cfg-pinecone-dimension');
+        const metricSelect = document.getElementById('cfg-pinecone-metric');
+        
+        const apiKey = apiKeyInput ? apiKeyInput.value.trim() : '';
+        const indexName = indexNameInput ? indexNameInput.value.trim() : 'default';
+        const dimension = dimensionInput ? parseInt(dimensionInput.value) : 384;
+        const metric = metricSelect ? metricSelect.value : 'cosine';
+        
+        if (!apiKey) { 
+            showModal('Pinecone API Key is required', { title: 'Validation Error', type: "warning" }); 
+            return; 
+        }
+        
+        if (!fullConfig.pinecone) fullConfig.pinecone = {};
+        fullConfig.pinecone.api_key = apiKey;
+        fullConfig.pinecone.index_name = indexName;
+        fullConfig.pinecone.dimension = dimension;
+        fullConfig.pinecone.metric = metric;
+        fullConfig.pinecone.cloud = 'aws';
+        fullConfig.pinecone.region = 'us-east-1';
+        
+        // Clear milvus config to avoid conflicts
+        fullConfig.milvus = { uri: '', token: '' };
+        
+    } else {
+        // Milvus mode
+        const cfgUriEl = document.getElementById('cfg-uri');
+        const cfgTokenEl = document.getElementById('cfg-token');
+        
+        const uri = cfgUriEl ? cfgUriEl.value.trim() : '';
+        const token = cfgTokenEl ? cfgTokenEl.value.trim() : '';
+        
+        if (!uri) { 
+            showModal(t("kb_uri_required"), { title: t("kb_validation_error"), type: "warning" }); 
+            return; 
+        }
+        
+        if (!fullConfig.milvus) fullConfig.milvus = {};
+        fullConfig.milvus.uri = uri;
+        fullConfig.milvus.token = token;
+        
+        // Clear pinecone config
+        delete fullConfig.pinecone;
+    }
 
     // Send complete JSON structure back
     await fetch('/api/kb/config', {
@@ -1113,29 +1492,11 @@ window.saveDbConfig = async function () {
         body: JSON.stringify(fullConfig)
     });
 
-    if (els.dbConfigModal) els.dbConfigModal.close();
+    const dbConfigModal = document.getElementById('db-config-modal');
+    if (dbConfigModal) dbConfigModal.close();
+    
     refreshKBFiles(); // Refresh immediately to test connection status
 };
-
-// ==========================================
-// --- Chunk Configuration Logic ---
-// ==========================================
-
-const CHUNK_CONFIG_STORAGE_KEY = "ultrarag_chunk_config";
-const INDEX_CONFIG_STORAGE_KEY = "ultrarag_index_config";
-
-// Load Chunk configuration from localStorage
-function loadChunkConfigFromStorage() {
-    try {
-        const raw = localStorage.getItem(CHUNK_CONFIG_STORAGE_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === "object") return parsed;
-    } catch (e) {
-        console.warn("Failed to load chunk config from storage", e);
-    }
-    return null;
-}
 
 // Save Chunk configuration to localStorage
 function persistChunkConfig() {
@@ -1168,26 +1529,28 @@ function persistIndexConfig() {
     }
 }
 
-// 1. Define default configuration state (try to restore from localStorage)
-let chunkConfigState = loadChunkConfigFromStorage() || {
-    chunk_backend: "token",
-    tokenizer_or_token_counter: "gpt2",
-    chunk_size: 500,
-    use_title: true
-};
+// 3. Save configuration
+function saveConfig() {
+    persistIndexConfig();
+    persistChunkConfig();
+    if (modal) modal.close();
+}
 
-// 2. Open configuration modal (echo current state)
-window.openChunkConfigModal = function () {
-    const modal = document.getElementById('chunk-config-modal');
-
-    // Echo data
-    document.getElementById('cfg-chunk-backend').value = chunkConfigState.chunk_backend;
-    document.getElementById('cfg-chunk-tokenizer').value = chunkConfigState.tokenizer_or_token_counter;
-    document.getElementById('cfg-chunk-size').value = chunkConfigState.chunk_size;
+// 4. Load configuration
+function loadConfig() {
+    const indexConfig = loadIndexConfig();
+    if (indexConfig) {
+        Object.assign(indexConfigState, indexConfig);
+    }
+    const chunkConfig = loadChunkConfig();
+    if (chunkConfig) {
+        Object.assign(chunkConfigState, chunkConfig);
+    }
     document.getElementById('cfg-chunk-title').value = chunkConfigState.use_title ? "true" : "false";
 
     if (modal) modal.showModal();
 };
+
 
 // 3. Save configuration
 window.saveChunkConfig = function () {
@@ -8730,10 +9093,12 @@ function updatePromptLineNumbers() {
 
 bootstrap();
 
-// Initialize workspace
+// Initialize workspace - Skip AI assistant initialization for now
 document.addEventListener('DOMContentLoaded', () => {
+    // Only initialize workspace, skip AI to avoid connection errors
     setTimeout(initWorkspace, 100);
-    setTimeout(initAIAssistant, 200);
+    // Comment out AI initialization until connection is configured
+    // setTimeout(initAIAssistant, 200);
 });
 
 // =========================================
