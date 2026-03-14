@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>法律知识库管理 - 系统首页</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>🗄️ 法律知识库管理系统</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="/">首页</a></li>
+                <li><a href="/contract">合同修订</a></li>
+                <li><a href="/pinecone" class="active">知识库管理</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container main-content">
+        <!-- 连接状态 -->
+        <section class="status-section">
+            <h2>📊 连接状态</h2>
+            <div class="status-card" id="connection-status">
+                <div class="status-indicator loading"></div>
+                <div class="status-info">
+                    <h4>Pinecone 连接状态</h4>
+                    <p class="status-text" id="status-text">检查中...</p>
+                </div>
+            </div>
+            <button onclick="checkStatus()" class="btn-secondary">🔄 刷新状态</button>
+        </section>
+
+        <!-- 配置管理 -->
+        <section class="config-section">
+            <h2>⚙️ 配置管理</h2>
+            
+            <div class="config-form">
+                <div class="form-group">
+                    <label for="pinecone-api-key">API Key:</label>
+                    <input type="password" id="pinecone-api-key" placeholder="输入 Pinecone API Key">
+                </div>
+                
+                <div class="form-group">
+                    <label for="pinecone-index">索引名称:</label>
+                    <input type="text" id="pinecone-index" placeholder="例如：software" value="software">
+                </div>
+                
+                <div class="form-group">
+                    <label for="chunk-backend">文本分块后端:</label>
+                    <select id="chunk-backend">
+                        <option value="default">默认 (Default)</option>
+                        <option value="mineru">MinerU</option>
+                        <option value="llama">LlamaParse</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button onclick="loadConfig()" class="btn-secondary">📥 加载配置</button>
+                    <button onclick="saveConfig()" class="btn-primary">💾 保存配置</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 文档上传 -->
+        <section class="upload-section">
+            <h2>📤 上传文档</h2>
+            
+            <div class="file-input-group">
+                <label for="document-path">文件路径:</label>
+                <input type="text" id="document-path" placeholder="输入或选择文件路径..." readonly>
+                <button onclick="browseDocuments()" class="btn-secondary">浏览文件</button>
+            </div>
+            
+            <div class="quick-select">
+                <p class="label">快速选择:</p>
+                <select id="document-select" onchange="selectDocument()">
+                    <option value="">-- 选择文件 --</option>
+                </select>
+            </div>
+            
+            <button onclick="uploadDocument()" class="btn-primary btn-large" id="upload-btn">
+                🚀 上传并处理
+            </button>
+            
+            <div class="progress-container" id="upload-progress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="upload-progress-fill"></div>
+                </div>
+                <p class="progress-text" id="upload-progress-text">处理中...</p>
+            </div>
+        </section>
+
+        <!-- 向量搜索 -->
+        <section class="search-section">
+            <h2>🔍 向量搜索</h2>
+            
+            <div class="search-box">
+                <textarea id="search-query" placeholder="输入搜索内容..." rows="3"></textarea>
+                <div class="search-controls">
+                    <label for="top-k">返回数量:</label>
+                    <input type="number" id="top-k" value="5" min="1" max="20">
+                    <button onclick="searchVectors()" class="btn-primary">🔍 搜索</button>
+                </div>
+            </div>
+            
+            <div class="search-results" id="search-results" style="display: none;">
+                <h3>搜索结果</h3>
+                <div id="results-list" class="results-list">
+                    <!-- 结果将动态插入 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 统计信息 -->
+        <section class="stats-section">
+            <h2>📈 统计信息</h2>
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-documents">-</div>
+                    <div class="stat-label">文档数量</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-chunks">-</div>
+                    <div class="stat-label">文本块数量</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-dimension">-</div>
+                    <div class="stat-label">向量维度</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-count">-</div>
+                    <div class="stat-label">总记录数</div>
+                </div>
+            </div>
+            <button onclick="loadStats()" class="btn-secondary">🔄 刷新统计</button>
+        </section>
+
+        <!-- 错误提示 -->
+        <div class="error-message" id="error-message" style="display: none;">
+            <h3>❌ 操作失败</h3>
+            <p id="error-text"></p>
+            <button onclick="dismissError()" class="btn-secondary">关闭</button>
+        </div>
+    </div>
+
+    <!-- 文件浏览器模态框 -->
+    <div id="file-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>选择文档文件</h3>
+            <div id="file-list" class="file-list">
+                加载文件列表中...
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script>
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            checkStatus();
+            loadConfig();
+            loadStats();
+            loadDocumentList();
+        });
+
+        // 检查连接状态
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/pinecone/status');
+                const data = await response.json();
+                
+                const statusCard = document.getElementById('connection-status');
+                const indicator = statusCard.querySelector('.status-indicator');
+                const statusText = document.getElementById('status-text');
+                
+                if (data.success && data.status.connected) {
+                    indicator.className = 'status-indicator success';
+                    statusText.textContent = `已连接 - 索引：${data.status.index_name || 'N/A'}`;
+                } else {
+                    indicator.className = 'status-indicator error';
+                    statusText.textContent = data.status.message || '未连接';
+                }
+            } catch (error) {
+                console.error('检查状态失败:', error);
+                showError('无法连接到 Pinecone 服务');
+            }
+        }
+
+        // 加载配置
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/pinecone/config');
+                const data = await response.json();
+                
+                if (data.success && data.config) {
+                    document.getElementById('pinecone-api-key').value = data.config.pinecone_api_key || '';
+                    document.getElementById('pinecone-index').value = data.config.pinecone_index || 'software';
+                    document.getElementById('chunk-backend').value = data.config.chunk_backend || 'default';
+                }
+            } catch (error) {
+                console.error('加载配置失败:', error);
+            }
+        }
+
+        // 保存配置
+        async function saveConfig() {
+            const config = {
+                pinecone_api_key: document.getElementById('pinecone-api-key').value,
+                pinecone_index: document.getElementById('pinecone-index').value,
+                chunk_backend: document.getElementById('chunk-backend').value
+            };
+            
+            try {
+                const response = await fetch('/api/pinecone/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ 配置已保存！');
+                    checkStatus(); // 刷新状态
+                } else {
+                    throw new Error(data.error || '保存失败');
+                }
+            } catch (error) {
+                console.error('保存配置失败:', error);
+                showError(error.message);
+            }
+        }
+
+        // 加载文档列表
+        async function loadDocumentList() {
+            try {
+                const response = await fetch('/api/contract/files');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const select = document.getElementById('document-select');
+                    
+                    if (data.files.length === 0) {
+                        select.innerHTML = '<option value="">-- 暂无可用文件 --</option>';
+                    } else {
+                        select.innerHTML = '<option value="">-- 选择文件 --</option>';
+                        data.files.forEach(file => {
+                            const option = document.createElement('option');
+                            option.value = file.path;
+                            option.textContent = `${file.name} (${formatFileSize(file.size)})`;
+                            select.appendChild(option);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('加载文档列表失败:', error);
+            }
+        }
+
+        // 浏览文档
+        function browseDocuments() {
+            const modal = document.getElementById('file-modal');
+            const fileList = document.getElementById('file-list');
+            
+            modal.style.display = 'block';
+            
+            const select = document.getElementById('document-select');
+            fileList.innerHTML = '';
+            
+            Array.from(select.options).forEach((option, index) => {
+                if (index === 0) return;
+                
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.textContent = option.text;
+                div.onclick = () => {
+                    document.getElementById('document-path').value = option.value;
+                    closeModal();
+                };
+                fileList.appendChild(div);
+            });
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('file-modal').style.display = 'none';
+        }
+
+        // 选择文档
+        function selectDocument() {
+            const select = document.getElementById('document-select');
+            const pathInput = document.getElementById('document-path');
+            
+            if (select.value) {
+                pathInput.value = select.value;
+            }
+        }
+
+        // 上传文档
+        async function uploadDocument() {
+            const filePath = document.getElementById('document-path').value;
+            
+            if (!filePath) {
+                showError('请先选择文件');
+                return;
+            }
+            
+            const chunkBackend = document.getElementById('chunk-backend').value;
+            
+            document.getElementById('upload-progress').style.display = 'block';
+            document.getElementById('upload-progress-fill').style.width = '30%';
+            document.getElementById('upload-progress-text').textContent = '正在处理文档...';
+            
+            try {
+                const response = await fetch('/api/pinecone/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_path: filePath,
+                        chunk_backend: chunkBackend
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('upload-progress-fill').style.width = '100%';
+                    document.getElementById('upload-progress-text').textContent = '处理完成！';
+                    
+                    setTimeout(() => {
+                        document.getElementById('upload-progress').style.display = 'none';
+                        alert('✅ 文档处理成功！');
+                        loadStats(); // 刷新统计
+                    }, 500);
+                } else {
+                    throw new Error(data.error || '处理失败');
+                }
+            } catch (error) {
+                console.error('上传文档失败:', error);
+                document.getElementById('upload-progress').style.display = 'none';
+                showError(error.message);
+            }
+        }
+
+        // 向量搜索
+        async function searchVectors() {
+            const query = document.getElementById('search-query').value;
+            const topK = parseInt(document.getElementById('top-k').value);
+            
+            if (!query.trim()) {
+                showError('请输入搜索内容');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/pinecone/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        top_k: topK
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.results && data.results.length > 0) {
+                    displaySearchResults(data.results);
+                } else {
+                    document.getElementById('search-results').style.display = 'block';
+                    document.getElementById('results-list').innerHTML = '<p>未找到相关结果</p>';
+                }
+            } catch (error) {
+                console.error('搜索失败:', error);
+                showError(error.message);
+            }
+        }
+
+        // 显示搜索结果
+        function displaySearchResults(results) {
+            const resultsDiv = document.getElementById('search-results');
+            const resultsList = document.getElementById('results-list');
+            
+            resultsDiv.style.display = 'block';
+            
+            resultsList.innerHTML = results.map((result, index) => `
+                <div class="result-item">
+                    <div class="result-header">
+                        <span class="result-rank">#${index + 1}</span>
+                        <span class="result-score">相似度：${(result.score || 0).toFixed(4)}</span>
+                    </div>
+                    <div class="result-content">
+                        <p>${result.text || result.metadata?.text || '无内容'}</p>
+                    </div>
+                    ${result.metadata?.source ? `<div class="result-meta">来源：${result.metadata.source}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 加载统计信息
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/pinecone/stats');
+                const data = await response.json();
+                
+                if (data.success && data.stats) {
+                    document.getElementById('stat-documents').textContent = data.stats.documents || '-';
+                    document.getElementById('stat-chunks').textContent = data.stats.chunks || '-';
+                    document.getElementById('stat-dimension').textContent = data.stats.dimension || '-';
+                    document.getElementById('stat-count').textContent = data.stats.total_count || '-';
+                }
+            } catch (error) {
+                console.error('加载统计失败:', error);
+            }
+        }
+
+        // 显示错误
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            
+            errorText.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // 关闭错误提示
+        function dismissError() {
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('file-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

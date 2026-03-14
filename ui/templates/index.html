@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合同修订与法律知识库管理系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>⚖️ 合同修订与法律知识库管理系统</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="/" class="active">首页</a></li>
+                <li><a href="/contract">合同修订</a></li>
+                <li><a href="/pinecone">知识库管理</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container main-content">
+        <!-- 欢迎区域 -->
+        <section class="welcome-section">
+            <h2>欢迎使用智能法律辅助系统</h2>
+            <p class="subtitle">集成 AI 合同审查与法律知识库检索的一站式解决方案</p>
+        </section>
+
+        <!-- 功能卡片 -->
+        <div class="features-grid">
+            <!-- 合同修订卡片 -->
+            <div class="feature-card" onclick="location.href='/contract'">
+                <div class="card-icon">📄</div>
+                <h3>合同智能修订</h3>
+                <p>基于 AI 大模型的合同自动审查与修订</p>
+                <ul class="feature-list">
+                    <li>✓ 支持 PDF/Word 格式</li>
+                    <li>✓ 自动识别法律条款</li>
+                    <li>✓ 智能匹配法律法规</li>
+                    <li>✓ 生成修订建议</li>
+                    <li>✓ 支持中文 OCR 识别</li>
+                </ul>
+                <div class="card-action">
+                    <span class="btn-primary">进入系统 →</span>
+                </div>
+            </div>
+
+            <!-- Pinecone 管理卡片 -->
+            <div class="feature-card" onclick="location.href='/pinecone'">
+                <div class="card-icon">🗄️</div>
+                <h3>法律知识库管理</h3>
+                <p>Pinecone 向量数据库管理与检索</p>
+                <ul class="feature-list">
+                    <li>✓ 文档上传与处理</li>
+                    <li>✓ 向量化存储</li>
+                    <li>✓ 语义相似度搜索</li>
+                    <li>✓ 索引状态监控</li>
+                    <li>✓ 配置管理</li>
+                </ul>
+                <div class="card-action">
+                    <span class="btn-primary">管理知识库 →</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 系统状态 -->
+        <section class="status-section">
+            <h3>系统状态</h3>
+            <div class="status-cards">
+                <div class="status-card" id="contract-status">
+                    <div class="status-indicator loading"></div>
+                    <div class="status-info">
+                        <h4>合同修订服务</h4>
+                        <p class="status-text">检查中...</p>
+                    </div>
+                </div>
+                <div class="status-card" id="pinecone-status">
+                    <div class="status-indicator loading"></div>
+                    <div class="status-info">
+                        <h4>Pinecone 知识库</h4>
+                        <p class="status-text">检查中...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 快速指南 -->
+        <section class="guide-section">
+            <h3>快速使用指南</h3>
+            <div class="guide-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>选择功能模块</h4>
+                        <p>根据需求选择"合同修订"或"知识库管理"</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>上传/选择文件</h4>
+                        <p>上传合同文件或法律文档进行处理</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>查看结果</h4>
+                        <p>获取 AI 生成的修订建议或检索结果</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 合同修订与法律知识库管理系统 | 基于 UltraRAG 和 DeepSeek AI</p>
+        </div>
+    </footer>
+
+    <script>
+        // 页面加载时检查系统状态
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemStatus();
+        });
+
+        // 检查系统状态
+        async function checkSystemStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateServiceStatus('contract-status', data.services.contract_revision);
+                    updateServiceStatus('pinecone-status', data.services.pinecone_manager);
+                } else {
+                    showStatusError();
+                }
+            } catch (error) {
+                console.error('健康检查失败:', error);
+                showStatusError();
+            }
+        }
+
+        // 更新服务状态显示
+        function updateServiceStatus(elementId, isReady) {
+            const element = document.getElementById(elementId);
+            const indicator = element.querySelector('.status-indicator');
+            const statusText = element.querySelector('.status-text');
+            
+            indicator.classList.remove('loading', 'success', 'error');
+            
+            if (isReady) {
+                indicator.classList.add('success');
+                statusText.textContent = '运行正常';
+            } else {
+                indicator.classList.add('error');
+                statusText.textContent = '未就绪';
+            }
+        }
+
+        // 显示状态错误
+        function showStatusError() {
+            ['contract-status', 'pinecone-status'].forEach(id => {
+                const element = document.getElementById(id);
+                const indicator = element.querySelector('.status-indicator');
+                const statusText = element.querySelector('.status-text');
+                
+                indicator.classList.remove('loading', 'success');
+                indicator.classList.add('error');
+                statusText.textContent = '连接失败';
+            });
+        }
+    </script>
+</body>
+</html>

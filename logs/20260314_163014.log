@@ -1,0 +1,55 @@
+[03/14/26 16:30:18] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 16:30:18] INFO [UltraRAG.client] Initializing MCP Client...
+[03/14/26 16:31:58] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 16:31:58] INFO [UltraRAG.client] Initializing MCP Client...
+[03/14/26 16:32:01] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 16:32:01] INFO [UltraRAG.client] Initializing MCP Client...
+[03/14/26 16:32:04] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 16:32:04] INFO [UltraRAG.client] Initializing MCP Client...
+[03/14/26 16:48:50] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 16:48:50] INFO [UltraRAG.client] Initializing MCP Client...
+[03/14/26 17:00:41] INFO [UltraRAG.client] Building configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 17:00:41] WARNING [UltraRAG.client] No parameter.yaml found for benchmark, skipping
+[03/14/26 17:00:41] WARNING [UltraRAG.client] No parameter.yaml found for retriever, skipping
+[03/14/26 17:00:41] WARNING [UltraRAG.client] No parameter.yaml found for generation, skipping
+[03/14/26 17:00:41] WARNING [UltraRAG.client] No parameter.yaml found for custom, skipping
+[03/14/26 17:00:41] WARNING [UltraRAG.client] No parameter.yaml found for prompt, skipping
+[03/14/26 17:00:41] WARNING [UltraRAG.client] No parameter.yaml found for sayhello, skipping
+[03/14/26 17:01:20] INFO [UltraRAG.client] Building configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\RAG-web.yaml
+[03/14/26 17:01:20] WARNING [UltraRAG.client] No parameter.yaml found for benchmark, skipping
+[03/14/26 17:01:20] WARNING [UltraRAG.client] No parameter.yaml found for retriever, skipping
+[03/14/26 17:01:20] WARNING [UltraRAG.client] No parameter.yaml found for prompt, skipping
+[03/14/26 17:01:20] WARNING [UltraRAG.client] No parameter.yaml found for generation, skipping
+[03/14/26 17:01:20] WARNING [UltraRAG.client] No parameter.yaml found for evaluation, skipping
+[03/14/26 17:01:20] WARNING [UltraRAG.client] No parameter.yaml found for custom, skipping
+[03/14/26 17:02:10] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 17:02:10] INFO [UltraRAG.client] Initializing MCP Client...
+[03/14/26 17:10:55] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 17:10:55] INFO [UltraRAG.client] Initializing MCP Client...
+[03/14/26 17:17:09] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 17:17:09] INFO [UltraRAG.client] Initializing MCP Client...
+[03/14/26 17:23:50] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 17:23:50] INFO [UltraRAG.client] Initializing MCP Client...
+[03/14/26 17:23:59] INFO [UltraRAG.client] Building configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 17:23:59] WARNING [UltraRAG.client] No parameter.yaml found for benchmark, skipping
+[03/14/26 17:23:59] WARNING [UltraRAG.client] No parameter.yaml found for retriever, skipping
+[03/14/26 17:23:59] WARNING [UltraRAG.client] No parameter.yaml found for generation, skipping
+[03/14/26 17:23:59] WARNING [UltraRAG.client] No parameter.yaml found for custom, skipping
+[03/14/26 17:23:59] WARNING [UltraRAG.client] No parameter.yaml found for prompt, skipping
+[03/14/26 17:23:59] WARNING [UltraRAG.client] No parameter.yaml found for sayhello, skipping
+[03/14/26 17:24:13] INFO [UltraRAG.client] Building configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 17:24:13] WARNING [UltraRAG.client] No parameter.yaml found for benchmark, skipping
+[03/14/26 17:24:13] WARNING [UltraRAG.client] No parameter.yaml found for retriever, skipping
+[03/14/26 17:24:13] WARNING [UltraRAG.client] No parameter.yaml found for generation, skipping
+[03/14/26 17:24:13] WARNING [UltraRAG.client] No parameter.yaml found for custom, skipping
+[03/14/26 17:24:13] WARNING [UltraRAG.client] No parameter.yaml found for prompt, skipping
+[03/14/26 17:24:13] WARNING [UltraRAG.client] No parameter.yaml found for sayhello, skipping
+[03/14/26 17:24:27] INFO [UltraRAG.client] Building configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 17:24:27] WARNING [UltraRAG.client] No parameter.yaml found for benchmark, skipping
+[03/14/26 17:24:27] WARNING [UltraRAG.client] No parameter.yaml found for retriever, skipping
+[03/14/26 17:24:27] WARNING [UltraRAG.client] No parameter.yaml found for generation, skipping
+[03/14/26 17:24:27] WARNING [UltraRAG.client] No parameter.yaml found for custom, skipping
+[03/14/26 17:24:27] WARNING [UltraRAG.client] No parameter.yaml found for prompt, skipping
+[03/14/26 17:24:27] WARNING [UltraRAG.client] No parameter.yaml found for sayhello, skipping
+[03/14/26 17:29:24] INFO [UltraRAG.client] Executing pipeline with configuration D:\华南理工大学\软件工程概论\contract_revision_agent\UltraRAG\examples\sayhello.yaml
+[03/14/26 17:29:25] INFO [UltraRAG.client] Initializing MCP Client...

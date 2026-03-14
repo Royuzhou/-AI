@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合同智能修订 - 系统首页</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>⚖️ 合同智能修订系统</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="/">首页</a></li>
+                <li><a href="/contract" class="active">合同修订</a></li>
+                <li><a href="/pinecone">知识库管理</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container main-content">
+        <!-- 文件选择区域 -->
+        <section class="upload-section">
+            <h2>📄 上传或选择合同文件</h2>
+            
+            <div class="file-selector">
+                <div class="file-input-group">
+                    <label for="file-path">文件路径:</label>
+                    <input type="text" id="file-path" placeholder="输入或选择文件路径..." readonly>
+                    <button onclick="browseFiles()" class="btn-secondary">浏览文件</button>
+                </div>
+                
+                <div class="quick-select">
+                    <p class="label">快速选择:</p>
+                    <select id="file-select" onchange="selectFile()">
+                        <option value="">-- 选择已有文件 --</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="supported-formats">
+                <p>✅ 支持格式：PDF (.pdf), Word (.docx, .doc)</p>
+                <p>ℹ️ PDF 扫描件将自动使用 OCR 识别</p>
+            </div>
+        </section>
+
+        <!-- 处理控制区域 -->
+        <section class="control-section">
+            <button onclick="processContract()" class="btn-primary btn-large" id="process-btn">
+                🚀 开始智能审查
+            </button>
+            
+            <div class="progress-container" id="progress-container" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text" id="progress-text">处理中...</p>
+            </div>
+        </section>
+
+        <!-- 结果展示区域 -->
+        <section class="results-section" id="results-section" style="display: none;">
+            <h2>📊 审查结果</h2>
+            
+            <!-- 选项卡 -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('revised')">修订合同</button>
+                <button class="tab-btn" onclick="switchTab('suggestions')">修改建议</button>
+                <button class="tab-btn" onclick="switchTab('clauses')">法律条款</button>
+            </div>
+            
+            <!-- 修订合同 -->
+            <div class="tab-content active" id="tab-revised">
+                <div class="result-card">
+                    <h3>📝 修订后的合同文本</h3>
+                    <div class="text-display" id="revised-contract-text">
+                        加载中...
+                    </div>
+                    <button onclick="copyRevisedContract()" class="btn-secondary">
+                        📋 复制全文
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 修改建议 -->
+            <div class="tab-content" id="tab-suggestions">
+                <div class="result-card">
+                    <h3>💡 修改建议列表</h3>
+                    <div id="suggestions-list" class="suggestions-list">
+                        加载中...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 法律条款 -->
+            <div class="tab-content" id="tab-clauses">
+                <div class="result-card">
+                    <h3>⚖️ 识别的法律条款</h3>
+                    <div id="legal-clauses-list" class="clauses-list">
+                        加载中...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 错误提示 -->
+        <div class="error-message" id="error-message" style="display: none;">
+            <h3>❌ 处理失败</h3>
+            <p id="error-text"></p>
+            <button onclick="dismissError()" class="btn-secondary">关闭</button>
+        </div>
+    </div>
+
+    <!-- 文件浏览器模态框 -->
+    <div id="file-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>选择合同文件</h3>
+            <div id="file-list" class="file-list">
+                加载文件列表中...
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script>
+        // 页面加载时获取文件列表
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFileList();
+        });
+
+        // 加载文件列表
+        async function loadFileList() {
+            try {
+                const response = await fetch('/api/contract/files');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const select = document.getElementById('file-select');
+                    
+                    if (data.files.length === 0) {
+                        select.innerHTML = '<option value="">-- 暂无可用文件 --</option>';
+                    } else {
+                        select.innerHTML = '<option value="">-- 选择已有文件 --</option>';
+                        data.files.forEach(file => {
+                            const option = document.createElement('option');
+                            option.value = file.path;
+                            option.textContent = `${file.name} (${formatFileSize(file.size)})`;
+                            select.appendChild(option);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('加载文件列表失败:', error);
+            }
+        }
+
+        // 浏览文件
+        function browseFiles() {
+            const modal = document.getElementById('file-modal');
+            const fileList = document.getElementById('file-list');
+            
+            modal.style.display = 'block';
+            
+            // 从下拉框获取文件列表
+            const select = document.getElementById('file-select');
+            fileList.innerHTML = '';
+            
+            Array.from(select.options).forEach((option, index) => {
+                if (index === 0) return; // 跳过第一个提示选项
+                
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                div.textContent = option.text;
+                div.onclick = () => {
+                    document.getElementById('file-path').value = option.value;
+                    closeModal();
+                };
+                fileList.appendChild(div);
+            });
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('file-modal').style.display = 'none';
+        }
+
+        // 选择文件
+        function selectFile() {
+            const select = document.getElementById('file-select');
+            const pathInput = document.getElementById('file-path');
+            
+            if (select.value) {
+                pathInput.value = select.value;
+            }
+        }
+
+        // 处理合同
+        async function processContract() {
+            const filePath = document.getElementById('file-path').value;
+            
+            if (!filePath) {
+                showError('请先选择或输入文件路径');
+                return;
+            }
+            
+            // 显示进度条
+            document.getElementById('progress-container').style.display = 'block';
+            document.getElementById('progress-fill').style.width = '30%';
+            document.getElementById('progress-text').textContent = '正在提取文档文本...';
+            
+            try {
+                const response = await fetch('/api/contract/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_path: filePath
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 更新进度
+                    document.getElementById('progress-fill').style.width = '100%';
+                    document.getElementById('progress-text').textContent = '处理完成！';
+                    
+                    setTimeout(() => {
+                        displayResults(data.data);
+                        document.getElementById('progress-container').style.display = 'none';
+                    }, 500);
+                } else {
+                    throw new Error(data.error || '处理失败');
+                }
+            } catch (error) {
+                console.error('处理合同失败:', error);
+                document.getElementById('progress-container').style.display = 'none';
+                showError(error.message);
+            }
+        }
+
+        // 显示结果
+        function displayResults(result) {
+            const resultsSection = document.getElementById('results-section');
+            resultsSection.style.display = 'block';
+            
+            // 修订合同
+            const revisedText = document.getElementById('revised-contract-text');
+            revisedText.textContent = result.revised_contract || '无修订内容';
+            
+            // 修改建议
+            const suggestionsList = document.getElementById('suggestions-list');
+            if (result.suggestions && result.suggestions.length > 0) {
+                suggestionsList.innerHTML = result.suggestions.map(suggestion => `
+                    <div class="suggestion-item">
+                        <h4>${suggestion.clause || '未指定条款'}</h4>
+                        <p><strong>原文:</strong> ${suggestion.original || '无'}</p>
+                        <p><strong>建议:</strong> ${suggestion.suggestion || '无'}</p>
+                        <p><strong>理由:</strong> ${suggestion.reason || '无'}</p>
+                    </div>
+                `).join('');
+            } else {
+                suggestionsList.innerHTML = '<p>暂无修改建议</p>';
+            }
+            
+            // 法律条款
+            const clausesList = document.getElementById('legal-clauses-list');
+            if (result.identified_clauses && result.identified_clauses.length > 0) {
+                clausesList.innerHTML = result.identified_clauses.map(clause => `
+                    <div class="clause-item">
+                        <span class="clause-tag">${clause.category || '其他'}</span>
+                        <p>${clause.text || clause}</p>
+                    </div>
+                `).join('');
+            } else {
+                clausesList.innerHTML = '<p>未识别到法律条款</p>';
+            }
+            
+            // 滚动到结果区域
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 切换选项卡
+        function switchTab(tabName) {
+            // 隐藏所有内容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有按钮激活状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 激活选中的选项卡
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 复制修订合同
+        function copyRevisedContract() {
+            const text = document.getElementById('revised-contract-text').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已复制到剪贴板！');
+            }).catch(err => {
+                alert('复制失败，请手动复制');
+            });
+        }
+
+        // 显示错误
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            
+            errorText.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // 关闭错误提示
+        function dismissError() {
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('file-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
