@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 诊断工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>UltraRAG UI 诊断工具</h1>
+    
+    <h2>测试项目</h2>
+    <div id="tests"></div>
+    
+    <h2>手动测试</h2>
+    <button onclick="testWorkspace()">测试 Workspace 按钮</button>
+    <button onclick="testParams()">测试 Params 面板</button>
+    <button onclick="testPrompts()">测试 Prompts 面板</button>
+    
+    <script>
+        const results = [];
+        
+        function addResult(test, pass, message) {
+            results.push({ test, pass, message });
+            renderResults();
+        }
+        
+        function renderResults() {
+            const container = document.getElementById('tests');
+            container.innerHTML = results.map(r => 
+                `<div class="test-result ${r.pass ? 'pass' : 'fail'}">
+                    <strong>${r.test}:</strong> ${r.pass ? '✓' : '✗'} ${r.message}
+                </div>`
+            ).join('');
+        }
+        
+        // Test 1: Check if main.js is loaded
+        if (typeof switchWorkspaceMode === 'function') {
+            addResult('main.js 加载', true, 'switchWorkspaceMode 函数可用');
+        } else {
+            addResult('main.js 加载', false, 'switchWorkspaceMode 函数未定义');
+        }
+        
+        // Test 2: Check if workspace buttons exist
+        const workspaceButtons = document.querySelectorAll('.workspace-nav-btn[data-mode]');
+        if (workspaceButtons.length > 0) {
+            addResult('Workspace 按钮', true, `找到 ${workspaceButtons.length} 个按钮`);
+        } else {
+            addResult('Workspace 按钮', false, '未找到 Workspace 按钮');
+        }
+        
+        // Test 3: Check if event listeners are attached
+        let hasEventListeners = false;
+        workspaceButtons.forEach(btn => {
+            if (btn.onclick || btn._listener) hasEventListeners = true;
+        });
+        addResult('事件监听器', hasEventListeners, hasEventListeners ? '已绑定' : '未绑定');
+        
+        function testWorkspace() {
+            const pipelineBtn = document.querySelector('.workspace-nav-btn[data-mode="pipeline"]');
+            if (pipelineBtn) {
+                pipelineBtn.click();
+                console.log('Workspace 按钮点击成功');
+            } else {
+                console.error('找不到 Pipeline 按钮');
+            }
+        }
+        
+        function testParams() {
+            const paramsBtn = document.querySelector('.workspace-nav-btn[data-mode="parameters"]');
+            if (paramsBtn) {
+                paramsBtn.click();
+                console.log('Params 按钮点击成功');
+            } else {
+                console.error('找不到 Params 按钮');
+            }
+        }
+        
+        function testPrompts() {
+            const promptsBtn = document.querySelector('.workspace-nav-btn[data-mode="prompts"]');
+            if (promptsBtn) {
+                promptsBtn.click();
+                console.log('Prompts 按钮点击成功');
+            } else {
+                console.error('找不到 Prompts 按钮');
+            }
+        }
+        
+        // Auto-run tests after page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                renderResults();
+            }, 500);
+        });
+    </script>
+    
+    <script src="http://localhost:5050/main.js"></script>
+</body>
+</html>
