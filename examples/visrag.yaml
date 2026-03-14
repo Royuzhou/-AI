@@ -2,10 +2,10 @@
 
 # MCP Server
 servers:
-  benchmark: servers/benchmark
-  retriever: servers/retriever
-  prompt: servers/prompt
-  generation: servers/generation
+  benchmark: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/benchmark
+  retriever: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/retriever
+  prompt: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/prompt
+  generation: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/generation
 
 # MCP Client Pipeline
 pipeline:

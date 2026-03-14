@@ -2,11 +2,11 @@
 
 # MCP Server
 servers:
-  benchmark: servers/benchmark
-  prompt: servers/prompt
-  generation: servers/generation
-  evaluation: servers/evaluation
-  custom: servers/custom
+  benchmark: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/benchmark
+  prompt: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/prompt
+  generation: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/generation
+  evaluation: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/evaluation
+  custom: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/custom
 
 # MCP Client Pipeline
 pipeline:

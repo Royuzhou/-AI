@@ -2,7 +2,7 @@
 
 # MCP Server
 servers:
-  retriever: servers/retriever
+  retriever: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/retriever
 
 # MCP Client Pipeline
 pipeline:

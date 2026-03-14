@@ -3,7 +3,7 @@
 
 # MCP Server
 servers:
-  corpus: servers/corpus
+  corpus: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/corpus
 
 # MCP Client Pipeline - 只执行文件解析
 pipeline:

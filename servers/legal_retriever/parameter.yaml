@@ -1,0 +1,6 @@
+# Legal Retriever Server 参数配置
+pinecone_api_key: pcsk_6f3yXX_CK5s2GTwXKPQVectvkzKqdQvBArp4Q6FnHhxYV5UDGiVBaFTEBN9AiErWv58Kd2
+pinecone_index: software
+top_k: 3
+similarity_threshold: 0.6
+embedding_model: sentence-transformers/all-MiniLM-L6-v2

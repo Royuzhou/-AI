@@ -1,0 +1,25 @@
+# 简化的合同修订 Pipeline (用于 UI 演示)
+
+# 使用 sayhello 作为示例服务器
+servers:
+  sayhello: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/sayhello
+
+# Pipeline 定义
+pipeline:
+- sayhello.greet
+
+# 参数配置 - 模拟合同修订流程的输入
+parameters:
+  sayhello:
+    # 在实际使用中，这里会是合同文本和处理参数
+    name: "合同修订系统 - 演示版本"
+
+# 说明：
+# 这是一个简化版本的 pipeline，用于在 UltraRAG UI 中演示
+# 完整的合同修订 pipeline 需要以下服务器:
+# 1. doc_extractor - 文档提取
+# 2. legal_identifier - 法律条款识别  
+# 3. legal_retriever - 法律条文检索
+# 4. contract_revision - 合同修订生成
+# 
+# 完整实现请参考 examples/contract_revision_pipeline.yaml

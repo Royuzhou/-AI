@@ -3,8 +3,8 @@
 
 # MCP 服务器
 servers:
-  corpus: servers/corpus
-  retriever: servers/retriever
+  corpus: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/corpus
+  retriever: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/retriever
 
 # 知识库配置
 knowledge_base:

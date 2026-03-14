@@ -1,0 +1,57 @@
+# Contract Revision Pipeline - 合同修订完整流程
+
+# MCP Servers
+servers:
+  # 1. 文档提取服务 (使用本地 Python 脚本)
+  doc_extractor: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/doc_extractor
+  
+  # 2. 法律条款识别服务 (调用 DeepSeek API)
+  legal_identifier: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/legal_identifier
+  
+  # 3. 法律条文检索服务 (Pinecone 向量搜索)
+  legal_retriever: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/legal_retriever
+  
+  # 4. 合同修订生成服务 (调用 DeepSeek API)
+  contract_revision: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/contract_revision
+
+# Pipeline 定义 - 按顺序执行各个步骤
+pipeline:
+  # 步骤 1: 从文件提取文本
+  - doc_extractor.extract_text
+  
+  # 步骤 2: 识别法律条款
+  - legal_identifier.identify_clauses
+  
+  # 步骤 3: 检索相关法律条文
+  - legal_retriever.search_references
+  
+  # 步骤 4: 生成修订后的合同
+  - contract_revision.revise_contract
+
+# 全局参数配置
+parameters:
+  # 文档提取参数
+  doc_extractor:
+    ocr_lang: ch
+    use_textline_orientation: true
+  
+  # 法律识别参数 (使用 DeepSeek)
+  legal_identifier:
+    model: deepseek-chat
+    categories:
+      - 责任条款
+      - 监管条款
+      - 合规条款
+      - 争议解决
+      - 其他法律条款
+  
+  # 法律检索参数
+  legal_retriever:
+    pinecone_index: software
+    top_k: 3
+    similarity_threshold: 0.6
+  
+  # 合同修订参数 (使用 DeepSeek)
+  contract_revision:
+    model: deepseek-chat
+    include_suggestions: true

@@ -2,9 +2,9 @@
 
 # MCP Server
 servers:
-  benchmark: servers/benchmark
-  retriever: servers/retriever
-  reranker: servers/reranker
+  benchmark: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/benchmark
+  retriever: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/retriever
+  reranker: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/reranker
 
 # MCP Client Pipeline
 pipeline:

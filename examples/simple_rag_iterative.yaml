@@ -2,9 +2,9 @@
 # 移除了复杂的评估和重排序，保留核心迭代检索功能
 
 servers:
-  corpus: servers/corpus
-  retriever: servers/retriever
-  generation: servers/generation
+  corpus: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/corpus
+  retriever: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/retriever
+  generation: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/generation
 
 pipeline:
   # Phase 1: 构建知识库

@@ -1,9 +1,15 @@
-# Sayhello Demo
-
-# MCP Server
 servers:
-  sayhello: servers/sayhello
-
-# MCP Client Pipeline
+  benchmark: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/benchmark
+  retriever: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/retriever
+  generation: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/generation
+  custom: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/custom
+  prompt: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/prompt
+  sayhello: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/sayhello
 pipeline:
-- sayhello.greet
+- benchmark.get_data
+- retriever.retriever_init
+- generation.generation_init
+- retriever.retriever_websearch
+- custom.assign_citation_ids_stateful
+- prompt.qa_rag_boxed
+- generation.generate

@@ -1,0 +1,4 @@
+# Legal Identifier Server 参数配置
+model: deepseek-chat
+api_key: sk-f421b6764bab44a08617c32812bbd607
+base_url: https://api.deepseek.com/v1

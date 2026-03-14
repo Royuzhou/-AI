@@ -3,11 +3,11 @@
 
 # ==================== MCP 服务器定义 ====================
 servers:
-  corpus: servers/corpus          # 语料处理服务
-  retriever: servers/retriever    # 检索服务
-  reranker: servers/reranker      # 重排序服务
-  generation: servers/generation  # 生成服务
-  evaluation: servers/evaluation  # 评估服务
+  corpus: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/corpus          # 语料处理服务
+  retriever: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/retriever    # 检索服务
+  reranker: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/reranker      # 重排序服务
+  generation: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/generation  # 生成服务
+  evaluation: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/evaluation  # 评估服务
 
 # ==================== 处理流水线 ====================
 # 定义完整的 RAG 迭代流程

@@ -2,7 +2,7 @@
 
 # MCP Server
 servers:
-  generation: servers/generation
+  generation: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/generation
 
 # MCP Client Pipeline
 pipeline:

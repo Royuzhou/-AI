@@ -1,0 +1,4 @@
+# Document Extractor Server 参数配置
+ocr_lang: ch
+use_textline_orientation: true
+pdf_text_threshold: 50

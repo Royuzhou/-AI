@@ -2,8 +2,8 @@
 
 # MCP Server
 servers:
-  benchmark: servers/benchmark
-  evaluation: servers/evaluation
+  benchmark: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/benchmark
+  evaluation: D:/华南理工大学/软件工程概论/contract_revision_agent/UltraRAG/servers/evaluation
 
 # MCP Client Pipeline
 pipeline:
