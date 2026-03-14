@@ -9,13 +9,13 @@ from openai import OpenAI
 class ContractReviser:
     """合同修订器"""
     
-    def __init__(self, api_key, base_url, model="qwen3-max"):
+    def __init__(self, api_key, base_url, model="deepseek-chat"):
         """
         初始化合同修订器
         
         Args:
-            api_key: API密钥
-            base_url: API基础URL
+            api_key: API 密钥
+            base_url: API 基础 URL
             model: 模型名称
         """
         self.client = OpenAI(api_key=api_key, base_url=base_url)

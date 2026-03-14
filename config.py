@@ -2,11 +2,11 @@
 合同修订智能体配置文件
 """
 
-# Qwen3-Max API配置
+# Qwen3-Max API配置 (已切换到 DeepSeek)
 QWEN_CONFIG = {
-    "api_key": "sk-a852d5808e084025aae207a99545b776",
-    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
-    "model": "qwen3-max"
+    "api_key": "sk-f421b6764bab44a08617c32812bbd607",
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-chat"
 }
 
 # Pinecone配置
