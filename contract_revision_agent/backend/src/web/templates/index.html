@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}合同修订{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header"><h4 class="mb-0"><i class="bi bi-pencil-square"></i> 合同智能修订</h4></div>
+            <div class="card-body">
+                <!-- 上传区 -->
+                <div class="upload-area mb-4" id="contract-upload-area">
+                    <i class="bi bi-file-earmark-text" style="font-size: 2.5rem; color: #667eea;"></i>
+                    <p class="mt-2 mb-1 fw-bold">上传合同文件</p>
+                    <p class="text-muted small">支持 .pdf / .docx 格式</p>
+                    <input type="file" id="contract-file-input" accept=".pdf,.docx" hidden onchange="onContractFileSelected(event)">
+                    <button class="btn btn-outline-primary mt-2" onclick="document.getElementById('contract-file-input').click()">选择文件</button>
+                </div>
+                <div id="contract-file-info" class="d-none mb-3">
+                    <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded">
+                        <span id="contract-filename"></span>
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearContractFile()">✕</button>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button class="btn btn-primary btn-lg" id="revise-btn" onclick="startRevision()" disabled>
+                        <i class="bi bi-gear"></i> 开始修订
+                    </button>
+                </div>
+
+                <!-- 进度 -->
+                <div id="revision-progress" class="d-none mt-4 text-center">
+                    <div class="spinner-border text-primary mb-2" role="status"></div>
+                    <p class="text-muted">正在处理合同，请耐心等待...</p>
+                    <p class="small text-muted">Agent 正在进行: 文档提取 → 法条检索 → 智能修订 → 裁判审查</p>
+                </div>
+
+                <!-- 结果 -->
+                <div id="revision-result" class="d-none mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0"><i class="bi bi-check-circle text-success"></i> 修订完成</h5>
+                        <button class="btn btn-sm btn-success" onclick="downloadResult()"><i class="bi bi-download"></i> 下载结果</button>
+                    </div>
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-contract">修订后合同</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-suggestions">修改建议</button></li>
+                    </ul>
+                    <div class="tab-content mt-3">
+                        <div class="tab-pane fade show active" id="tab-contract">
+                            <pre id="revised-content" class="result-pre"></pre>
+                        </div>
+                        <div class="tab-pane fade" id="tab-suggestions">
+                            <div id="suggestions-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="revision-error" class="d-none mt-3 alert alert-danger"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{{ url_for('static', filename='js/revision.js') }}"></script>{% endblock %}

@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project data
+logs/
+data/uploads/*
+data/outputs/*
+data/web_config.json
+data/chat_history.json
+!data/uploads/.gitkeep
+!data/outputs/.gitkeep
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Claude
+.claude/
+
+# Legacy
+_legacy/
+
+# Secrets
+.env
+*.key

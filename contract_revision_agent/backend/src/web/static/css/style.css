@@ -1,0 +1,100 @@
+/* 全局 */
+body {
+    background: #f0f2f5;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+}
+
+/* 导航栏 */
+.navbar {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    box-shadow: 0 2px 12px rgba(0,0,0,.15);
+}
+.navbar-brand {
+    font-weight: 700; letter-spacing: 1px;
+}
+.nav-link {
+    border-radius: 8px; padding: .5rem 1rem !important; margin: 0 .15rem; transition: all .2s;
+}
+.nav-link:hover, .nav-link.active {
+    background: rgba(255,255,255,.12);
+}
+.nav-link.active {
+    background: rgba(255,255,255,.18);
+}
+
+/* 卡片 */
+.card {
+    border: none; border-radius: 14px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff; border-radius: 14px 14px 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+/* 上传区 */
+.upload-area {
+    border: 2px dashed #d0d5dd; border-radius: 14px;
+    padding: 2.5rem; text-align: center; cursor: pointer;
+    transition: all .2s; background: #fafbfc;
+}
+.upload-area:hover, .upload-area.drag-over {
+    border-color: #667eea; background: #f0f2ff;
+}
+
+/* 表单 */
+.form-control, .form-select {
+    border-radius: 10px; border: 2px solid #e8eaed;
+    padding: .6rem .9rem; transition: all .2s;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #667eea; box-shadow: 0 0 0 .15rem rgba(102,126,234,.2);
+}
+
+/* 按钮 */
+.btn {
+    border-radius: 10px; font-weight: 600; transition: all .2s;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(102,126,234,.35); }
+.btn-primary:disabled { background: #ccc; transform: none; box-shadow: none; }
+
+/* 结果区 */
+.result-pre {
+    background: #f8f9fa; border-radius: 10px; padding: 1.5rem;
+    max-height: 500px; overflow-y: auto; white-space: pre-wrap;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif; font-size: .95rem; line-height: 1.8;
+}
+
+/* 统计值 */
+.stat-value { font-size: 1.8rem; font-weight: 700; color: #667eea; }
+
+/* 建议卡片 */
+.suggestion-card {
+    background: #fff; border-left: 4px solid #667eea;
+    padding: 1rem; margin-bottom: .8rem; border-radius: 8px;
+    box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+
+/* 连接状态 */
+.test-success { color: #198754; }
+.test-error { color: #dc3545; }
+
+/* 搜索结果 */
+.search-result-item {
+    background: #fff; border-radius: 10px; padding: 1rem;
+    margin-bottom: .6rem; border: 1px solid #e8eaed;
+}
+.search-result-score {
+    font-weight: 600; color: #667eea; font-size: .85rem;
+}
+
+/* Toast */
+.custom-toast {
+    min-width: 280px;
+}
